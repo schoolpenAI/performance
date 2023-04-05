@@ -9,7 +9,7 @@ def create_student_performance(student: student_performance):
     performance = (student.correct_answer / student.total_quetion) * 100
     percentage = (student.attempted_quetion/ student.total_quetion) * 100
     accuracy = (student.correct_answer / student.attempted_quetion) * 100
-    efficiency = (student.time_taken / student.time_given)
+    efficiency = (student.attempted_quetion*60 / student.time_taken)
     return {
             "performance": performance,
             "percentage": percentage,

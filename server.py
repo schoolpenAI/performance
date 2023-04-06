@@ -5,7 +5,7 @@ app = FastAPI()
 
 
 @app.post("/api/v1/evaluate", response_model=Performance)
-def create_student_performance(student: student_performance):
+def evaluate(student: student_performance):
     performance = (student.correct_answer / student.total_quetion) * 100
     percentage = (student.attempted_quetion/ student.total_quetion) * 100
     accuracy = (student.correct_answer / student.attempted_quetion) * 100
@@ -19,3 +19,59 @@ def create_student_performance(student: student_performance):
 
 
     
+
+
+@app.post("/api/v1/getPerformanceBySubject", response_model=Performance)
+def getAvgPerformanceByStudentWeekly(student: student_performance):
+    performance = (student.correct_answer / student.total_quetion) * 100
+    percentage = (student.attempted_quetion/ student.total_quetion) * 100
+    accuracy = (student.correct_answer / student.attempted_quetion) * 100
+    efficiency = (student.time_taken / student.time_given)
+    return {
+            "performance": performance,
+            "percentage": percentage,
+            "accuracy": accuracy,
+            "efficiency": efficiency,
+        }
+
+
+@app.post("/api/v1/getPerformanceBySubject", response_model=Performance)
+def getPerformanceBySubject(student: student_performance):
+    performance = (student.correct_answer / student.total_quetion) * 100
+    percentage = (student.attempted_quetion/ student.total_quetion) * 100
+    accuracy = (student.correct_answer / student.attempted_quetion) * 100
+    efficiency = (student.time_taken / student.time_given)
+    return {
+            "performance": performance,
+            "percentage": percentage,
+            "accuracy": accuracy,
+            "efficiency": efficiency,
+        }
+
+
+@app.post("/api/v1/getAvgPerformanceByStudentWeekly", response_model=Performance)
+def getAvgPerformanceByStudentWeekly(student: student_performance):
+    performance = (student.correct_answer / student.total_quetion) * 100
+    percentage = (student.attempted_quetion/ student.total_quetion) * 100
+    accuracy = (student.correct_answer / student.attempted_quetion) * 100
+    efficiency = (student.time_taken / student.time_given)
+    return {
+            "performance": performance,
+            "percentage": percentage,
+            "accuracy": accuracy,
+            "efficiency": efficiency,
+        }
+
+
+@app.post("/api/v1/getAvgPerformanceByStudentMonthly", response_model=Performance)
+def getAvgPerformanceByStudentMonthly(student: student_performance):
+    performance = (student.correct_answer / student.total_quetion) * 100
+    percentage = (student.attempted_quetion/ student.total_quetion) * 100
+    accuracy = (student.correct_answer / student.attempted_quetion) * 100
+    efficiency = (student.time_taken / student.time_given)
+    return {
+            "performance": performance,
+            "percentage": percentage,
+            "accuracy": accuracy,
+            "efficiency": efficiency,
+        }

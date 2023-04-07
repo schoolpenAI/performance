@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from schema import student_performance, Performance
+from schema import student_performance, Performance, PerformanceBySubject
 
 app = FastAPI()
 
@@ -26,7 +26,7 @@ def getAvgPerformanceByStudentWeekly(student: student_performance):
     performance = (student.correct_answer / student.total_quetion) * 100
     percentage = (student.attempted_quetion/ student.total_quetion) * 100
     accuracy = (student.correct_answer / student.attempted_quetion) * 100
-    efficiency = (student.time_taken / student.time_given)
+    efficiency = (student.attempted_quetion*60 / student.time_taken)
     return {
             "performance": performance,
             "percentage": percentage,
@@ -35,8 +35,8 @@ def getAvgPerformanceByStudentWeekly(student: student_performance):
         }
 
 
-@app.post("/api/v1/getPerformanceBySubject", response_model=Performance)
-def getPerformanceBySubject(student: student_performance):
+@app.post("/api/v1/getPerformanceBySubject/{subject_id}/{student_id}", response_model=Performance)
+def getPerformanceBySubject(student: PerformanceBySubject):
     performance = (student.correct_answer / student.total_quetion) * 100
     percentage = (student.attempted_quetion/ student.total_quetion) * 100
     accuracy = (student.correct_answer / student.attempted_quetion) * 100

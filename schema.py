@@ -42,3 +42,13 @@ class Performance(BaseModel):
     accuracy: float
     percentage: float
     performance: float
+
+class PerformanceBySubject(BaseModel):
+    subject_id:str
+    student_id:str
+    
+
+    
+
+
+

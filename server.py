@@ -1,15 +1,16 @@
 from fastapi import FastAPI
-from schema import student_performance, Performance, PerformanceBySubject
+from schema import student_performance, Performance, ResultAnalysis, PerformanceBySubject, MonthlyPerformance
 import pandas as pd
 import pyodbc
 from datetime import datetime
 from pydantic import BaseModel
+import datetime
 
 
-
+# creating a FastAPI instance
 app = FastAPI()
 
-
+# define a FastAPI endpoint to calculate and post the student performance in db
 @app.post("/api/v1/evaluate", response_model=Performance)
 def evaluate(student: student_performance):
     total_score = (student.correct_answer / student.total_quetion) * 100
@@ -24,26 +25,36 @@ def evaluate(student: student_performance):
         }
 
 
+# creating the connection to the SQL Server database
+conn = pyodbc.connect('DRIVER={SQL Server};SERVER=LAPTOP-DBB6O6KQ;DATABASE=performance_db;UID=prathi;PWD=p@123')
 
+# define a FastAPI endpoint to extract the result analysis data
+@app.get("/getPerformanceBySubject/{subject_id}/{student_id}")
+async def getPerformanceBySubject(subject_id: int, student_id:int):
+    # create a cursor to execute SQL queries
+    cursor = conn.cursor()
 
-# Database configuration details
-driver = "{ODBC Driver 17 for SQL Server}"
-server = "LAPTOP-DBB6O6KQ"
-database = "performance_db"
-username = "prathi"
-password = "p@123"
+    # execute a SQL query to extract the desired data based on the provided subject_id
+    query = f"SELECT accuracy, correct_percentage, total_score, efficiency FROM result_analysis WHERE subject_id = {subject_id} and student_id = {student_id}"
+    cursor.execute(query)
 
-# Function to get the database connection
-def get_db_conn():
-    conn = pyodbc.connect(f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}")
-    return conn
+    # extract the results and format them as a dictionary
+    results = cursor.fetchone()
+    data = {
+        "accuracy": results[0],
+        "correct_percentage": results[1],
+        "total_score": results[2],
+        "efficiency": results[3]
+    }
+
+    # return the data as a JSON response
+    return data
+
 
 # Endpoint to calculate EWMA for a particular student and subject
 @app.get("/ewma")
 def calculate_ewma(student_id: int, subject_id: int):
     try:
-        # Get the database connection
-        conn = get_db_conn()
         
         # Query the database to get the required data
         query = f"SELECT * FROM result_analysis WHERE student_id={student_id} AND subject_id={subject_id}"
@@ -64,40 +75,12 @@ def calculate_ewma(student_id: int, subject_id: int):
 
 
 
-
-
-
-
-
-
-
-# Create connection to SQL Server
-driver = "{ODBC Driver 17 for SQL Server}"
-server = "LAPTOP-DBB6O6KQ"
-database = "performance_db"
-username = "prathi"
-password = "p@123"
-
-conn = pyodbc.connect(f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}")
-
-# Define model for incoming data
-class ResultAnalysis(BaseModel):
-    accuracy: int
-    correct_percentage: int
-    efficiency: int
-    student_id: int
-    subject_id: int
-    test_id: int
-    total_score: int
-    subject_id: int
-    test_date: str
-
 # Define route to calculate monthly performance
 @app.post("/calculate_monthly_performance")
 async def calculate_monthly_performance():
     # Get current month and year
-    current_month = datetime.now().month
-    current_year = datetime.now().year
+    current_month = datetime.datetime.now().month
+    current_year = datetime.datetime.now().year
 
     # Fetch data from result_analysis table
     cursor = conn.cursor()
@@ -115,12 +98,9 @@ async def calculate_monthly_performance():
         subject_id = row.subject_id
         test_date = row.test_date
 
-         # Convert datetime.date object to string
-        test_date_str = test_date.strftime("%Y-%m-%d")
-
-        # Use the string version of test_date in strptime()
-        test_date = datetime.strptime(test_date_str, "%Y-%m-%d")
-
+        # Check if test_date is a string, convert to datetime.date object
+        if isinstance(test_date, str):
+            test_date = datetime.datetime.strptime(test_date, "%Y-%m-%d").date()
 
         # Extract month and year from test_date
         month = test_date.month
@@ -136,14 +116,9 @@ async def calculate_monthly_performance():
     return {"message": "Monthly performance calculated and stored successfully!"}
 
 
-# Define model for incoming data
-class MonthlyPerformance(BaseModel):
-    student_id: int
-    subject_id: int
-    month:int
 
 # Define route to get monthly performance
-@app.post("/get_monthly_performance")
+@app.get("/get_monthly_performance")
 async def get_monthly_performance(data: MonthlyPerformance):
     student_id = data.student_id
     subject_id = data.subject_id

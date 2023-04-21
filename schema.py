@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 
 """
 from typing import Optional
@@ -22,7 +23,7 @@ class student_performance(BaseModel):
     time_taken: Optional[int] = Field(None, title="Time Taken (Minutes)", ge=1, example=45)
 """
 
-
+# Define model for incoming data
 class student_performance(BaseModel):
     student_id = str
     schoolid: int
@@ -40,5 +41,32 @@ class student_performance(BaseModel):
 class Performance(BaseModel):
     efficiency: float
     accuracy: float
-    percentage: float
-    performance: float
+    correct_percentage: float
+    total_score: float
+
+class PerformanceBySubject(BaseModel):
+    subject_id: str
+    student_id: str
+
+
+
+class ResultAnalysis(BaseModel):
+    accuracy: int
+    correct_percentage: int
+    efficiency: int
+    student_id: int
+    subject_id: int
+    test_id: int
+    total_score: int
+    subject_id: int
+    test_date: str
+    
+class MonthlyPerformance(BaseModel):
+    student_id: int
+    subject_id: int
+    month:int
+
+    
+
+
+

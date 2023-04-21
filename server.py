@@ -60,7 +60,7 @@ def calculate_ewma(student_id: int, subject_id: int):
         query = f"SELECT * FROM result_analysis WHERE student_id={student_id} AND subject_id={subject_id}"
         df = pd.read_sql(query, conn)
         
-        # Calculate the EWMA with span=30 and adjust=True
+        # Calculate the EWMA with span=4 and adjust=True
         ewma = df['total_score'].ewm(span=4, adjust=True).mean()
         
         # Format the result

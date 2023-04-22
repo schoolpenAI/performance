@@ -52,23 +52,32 @@ async def getPerformanceBySubject(subject_id: int, student_id:int):
 
 
 # Endpoint to calculate EWMA for a particular student and subject
-@app.get("/ewma")
+@app.get("/ewma/{subject_id}/{student_id}")
 def calculate_ewma(student_id: int, subject_id: int):
     try:
-        
         # Query the database to get the required data
         query = f"SELECT * FROM result_analysis WHERE student_id={student_id} AND subject_id={subject_id}"
         df = pd.read_sql(query, conn)
-        
-        # Calculate the EWMA with span=30 and adjust=True
-        ewma = df['total_score'].ewm(span=4, adjust=True).mean()
-        
+
+        # Calculate EWMA for total_score, accuracy, efficiency, and correct_percentage
+        ewma_total_score = df['total_score'].ewm(alpha=0.1).mean()
+        ewma_accuracy = df['accuracy'].ewm(alpha=0.1).mean()
+        ewma_efficiency = df['efficiency'].ewm(alpha=0.1).mean()
+        ewma_correct_percentage = df['correct_percentage'].ewm(alpha=0.1).mean()
+
         # Format the result
-        result = {'student_id': student_id, 'subject_id': subject_id, 'ewma': ewma.tolist()}
-        
+        result = {
+            'student_id': student_id,
+            'subject_id': subject_id,
+            'ewma_total_score': ewma_total_score.tolist(),
+            'ewma_accuracy': ewma_accuracy.tolist(),
+            'ewma_efficiency': ewma_efficiency.tolist(),
+            'ewma_correct_percentage': ewma_correct_percentage.tolist()
+        }
+
         # Return the result
         return result
-        
+
     except Exception as e:
         # Handle any exceptions
         return {'error': str(e)}
